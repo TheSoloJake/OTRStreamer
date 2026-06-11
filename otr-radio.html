@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#121212">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="WOTR">
+<title>WOTR — Old Time Radio</title>
+<style>
+  :root {
+    --bg: #121212;
+    --bg-panel: #181818;
+    --bg-raised: #1f1f1f;
+    --text: #F5F5F5;
+    --text-dim: #8a8a8a;
+    --phosphor: #00FF41;
+    --phosphor-dim: #0a5c22;
+    --phosphor-glow: rgba(0, 255, 65, 0.45);
+    --border: #2a2a2a;
+    --mono: "Courier New", ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: "Helvetica Neue", Arial, sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    overscroll-behavior: none;            /* no pull-to-refresh killing the broadcast */
+    -webkit-text-size-adjust: 100%;       /* stop iOS landscape font inflation */
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  button { touch-action: manipulation; }  /* kill double-tap zoom delay on controls */
+
+  .app {
+    display: flex;
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  /* ---------- SIDEBAR ---------- */
+  .sidebar {
+    width: 240px;
+    min-width: 240px;
+    background: var(--bg-panel);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 28px 0;
+  }
+
+  .brand {
+    padding: 0 24px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .brand h1 {
+    font-family: var(--mono);
+    font-size: 22px;
+    letter-spacing: 4px;
+    color: var(--text);
+    font-weight: 700;
+  }
+
+  .brand .freq {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+
+  .station-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    padding: 24px 24px 10px;
+  }
+
+  .stations {
+    list-style: none;
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .stations button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    background: none;
+    border: none;
+    border-left: 3px solid transparent;
+    color: var(--text-dim);
+    font-family: var(--sans);
+    font-size: 15px;
+    text-align: left;
+    padding: 13px 24px;
+    cursor: pointer;
+    transition: color 0.2s, background 0.2s, border-color 0.2s;
+  }
+
+  .stations button:hover {
+    color: var(--text);
+    background: var(--bg-raised);
+  }
+
+  .stations button:focus-visible {
+    outline: 2px solid var(--phosphor);
+    outline-offset: -2px;
+  }
+
+  .stations button .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--border);
+    flex-shrink: 0;
+    transition: background 0.2s, box-shadow 0.2s;
+  }
+
+  .stations li.active button {
+    color: var(--text);
+    font-weight: 700;
+    background: var(--bg-raised);
+    border-left-color: var(--phosphor);
+  }
+
+  .stations li.active button .dot {
+    background: var(--phosphor);
+    box-shadow: 0 0 8px var(--phosphor-glow);
+  }
+
+  /* ---------- MAIN ---------- */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    position: relative;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 40%, rgba(0,255,65,0.025), transparent 70%),
+      var(--bg);
+  }
+
+  /* faint scanlines over the display, like a lit dial glass */
+  .display {
+    width: 100%;
+    max-width: 640px;
+    text-align: center;
+    position: relative;
+    padding: 48px 32px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background:
+      repeating-linear-gradient(0deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px),
+      var(--bg-panel);
+    transition: opacity 0.6s;
+  }
+
+  .display .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--text-dim);
+    margin-bottom: 18px;
+    min-height: 14px;
+  }
+
+  .display .title {
+    font-family: var(--mono);
+    font-size: clamp(18px, 3vw, 26px);
+    line-height: 1.45;
+    color: var(--phosphor);
+    text-shadow: 0 0 12px var(--phosphor-glow);
+    word-wrap: break-word;
+    min-height: 38px;
+    transition: color 0.5s, text-shadow 0.5s;
+  }
+
+  .display .subtitle {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-top: 12px;
+    min-height: 16px;
+  }
+
+  .display .timer {
+    font-family: var(--mono);
+    font-size: clamp(28px, 5vw, 42px);
+    letter-spacing: 3px;
+    color: var(--phosphor);
+    text-shadow: 0 0 14px var(--phosphor-glow);
+    margin-top: 30px;
+    font-variant-numeric: tabular-nums;
+    transition: color 0.5s, text-shadow 0.5s;
+  }
+
+  .display .timer-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    margin-top: 6px;
+  }
+
+  /* powered-off dimming */
+  .app.off .display .title,
+  .app.off .display .timer {
+    color: var(--phosphor-dim);
+    text-shadow: none;
+  }
+
+  /* tuning flicker */
+  @keyframes flicker {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+  }
+  .display.tuning .title {
+    animation: flicker 1.1s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .display.tuning .title { animation: none; opacity: 0.7; }
+  }
+
+  /* ---------- POWER ---------- */
+  .power-row {
+    margin-top: 40px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .power-btn {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--bg-raised);
+    color: var(--text-dim);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.3s, color 0.3s, box-shadow 0.3s;
+  }
+
+  .power-btn:focus-visible {
+    outline: 2px solid var(--phosphor);
+    outline-offset: 3px;
+  }
+
+  .power-btn svg {
+    width: 26px;
+    height: 26px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+  }
+
+  .app.on .power-btn {
+    border-color: var(--phosphor);
+    color: var(--phosphor);
+    box-shadow: 0 0 18px var(--phosphor-glow), inset 0 0 10px rgba(0,255,65,0.12);
+  }
+
+  .power-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+  }
+
+  /* ---------- MOBILE ---------- */
+  @media (max-width: 720px) {
+    .app { flex-direction: column; }
+    .sidebar {
+      width: 100%;
+      min-width: 0;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+      padding: calc(12px + env(safe-area-inset-top)) 0 0;
+    }
+    .brand {
+      padding: 0 calc(16px + env(safe-area-inset-left)) 10px;
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      border-bottom: none;
+    }
+    .brand h1 { font-size: 18px; }
+    .brand .freq { margin-top: 0; font-size: 10px; }
+    .station-label { display: none; }
+    .stations {
+      display: flex;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x proximity;
+      scrollbar-width: none;              /* Firefox */
+      padding: 0 calc(8px + env(safe-area-inset-left));
+      border-top: 1px solid var(--border);
+    }
+    .stations::-webkit-scrollbar { display: none; }
+    .stations button {
+      white-space: nowrap;
+      border-left: none;
+      border-bottom: 3px solid transparent;
+      padding: 0 16px;
+      min-height: 48px;                   /* comfortable thumb target */
+      scroll-snap-align: start;
+      font-size: 14px;
+    }
+    .stations li.active button {
+      border-left: none;
+      border-bottom-color: var(--phosphor);
+      background: none;
+    }
+    .main {
+      padding: 20px calc(16px + env(safe-area-inset-right))
+               calc(20px + env(safe-area-inset-bottom))
+               calc(16px + env(safe-area-inset-left));
+      justify-content: space-evenly;      /* display + power share the column nicely */
+    }
+    .display { padding: 28px 18px; }
+    .display .timer { margin-top: 22px; }
+    .power-row { margin-top: 0; flex-direction: column; gap: 10px; }
+    .power-btn { width: 76px; height: 76px; }  /* primary control = biggest target */
+  }
+
+  /* Phone in landscape: keep everything on one screen, no scrolling */
+  @media (max-width: 920px) and (max-height: 450px) {
+    .sidebar { padding-top: 8px; }
+    .brand { padding-bottom: 6px; }
+    .main {
+      flex-direction: row;
+      gap: 24px;
+      justify-content: center;
+      padding: 12px 16px;
+    }
+    .display { padding: 20px 18px; }
+    .display .timer { font-size: 26px; margin-top: 14px; }
+    .power-row { margin-top: 0; flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+<div class="app off" id="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <h1>WOTR</h1>
+      <div class="freq">OLD TIME RADIO &middot; AM 1937</div>
+    </div>
+    <div class="station-label">STATIONS</div>
+    <ul class="stations" id="stationList"></ul>
+  </aside>
+
+  <main class="main">
+    <div class="display" id="display">
+      <div class="eyebrow" id="eyebrow">STANDBY</div>
+      <div class="title" id="trackTitle">Select a station to tune in.</div>
+      <div class="subtitle" id="trackSub"></div>
+      <div class="timer" id="timer">--:--</div>
+      <div class="timer-label">TIME REMAINING</div>
+    </div>
+
+    <div class="power-row">
+      <button class="power-btn" id="powerBtn" aria-label="Power" aria-pressed="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 3v8"/>
+          <path d="M6.3 6.3a8 8 0 1 0 11.4 0"/>
+        </svg>
+      </button>
+      <div class="power-label" id="powerLabel">POWER OFF</div>
+    </div>
+  </main>
+</div>
+
+<audio id="player" preload="auto" crossorigin="anonymous" playsinline style="display:none"></audio>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---------- Station definitions ----------
+  const STATIONS = [
+    { id: "comedy",    name: "Comedy",          tag: "subject:(comedy OR sitcom)" },
+    { id: "mystery",   name: "Mystery / Horror", tag: "subject:(mystery OR horror OR suspense OR thriller)" },
+    { id: "detective", name: "Detective / Crime", tag: "subject:(detective OR crime OR police OR noir)" },
+    { id: "western",   name: "Westerns",         tag: "subject:(western OR frontier)" },
+    { id: "variety",   name: "Variety",          tag: null }
+  ];
+
+  // ---------- State ----------
+  let activeStation = null;     // station object
+  let isPoweredOn = false;
+  let isLoading = false;
+  let currentTrackInfo = null;  // { title, itemTitle, identifier }
+  let session = 0;              // incremented to invalidate in-flight fetches
+  const idCache = {};           // stationId -> array of identifiers
+
+  // ---------- DOM ----------
+  const appEl = document.getElementById("app");
+  const listEl = document.getElementById("stationList");
+  const displayEl = document.getElementById("display");
+  const eyebrowEl = document.getElementById("eyebrow");
+  const titleEl = document.getElementById("trackTitle");
+  const subEl = document.getElementById("trackSub");
+  const timerEl = document.getElementById("timer");
+  const powerBtn = document.getElementById("powerBtn");
+  const powerLabel = document.getElementById("powerLabel");
+  const audio = document.getElementById("player");
+
+  // ---------- Build station list ----------
+  STATIONS.forEach(function (st) {
+    const li = document.createElement("li");
+    li.dataset.id = st.id;
+    const btn = document.createElement("button");
+    const dot = document.createElement("span");
+    dot.className = "dot";
+    btn.appendChild(dot);
+    btn.appendChild(document.createTextNode(st.name));
+    btn.addEventListener("click", function () { selectStation(st); });
+    li.appendChild(btn);
+    listEl.appendChild(li);
+  });
+
+  function markActiveStation() {
+    Array.prototype.forEach.call(listEl.children, function (li) {
+      const isActive = !!activeStation && li.dataset.id === activeStation.id;
+      li.classList.toggle("active", isActive);
+      if (isActive && li.scrollIntoView) {
+        // On mobile the station bar scrolls horizontally — keep the live one visible
+        li.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
+      }
+    });
+  }
+
+  // ---------- Web Audio: compressor as auto gain control ----------
+  let audioCtx = null;
+  let webAudioOk = false;
+
+  // iOS suspends/interrupts AudioContext when the screen locks or Safari is
+  // backgrounded. Audio routed through Web Audio then goes SILENT even though
+  // the <audio> element reports it is playing. A pocket radio that dies when
+  // the screen locks is useless, so on iOS we skip the compressor entirely:
+  // lock-screen playback beats volume normalization.
+  const IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+  function initWebAudio() {
+    if (audioCtx || IS_IOS) return;
+    try {
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new Ctx();
+      const source = audioCtx.createMediaElementSource(audio);
+      const compressor = audioCtx.createDynamicsCompressor();
+      compressor.threshold.value = -28;
+      compressor.knee.value = 30;
+      compressor.ratio.value = 10;
+      compressor.attack.value = 0.005;
+      compressor.release.value = 0.3;
+      const makeup = audioCtx.createGain();
+      makeup.gain.value = 1.4;
+      source.connect(compressor);
+      compressor.connect(makeup);
+      makeup.connect(audioCtx.destination);
+      webAudioOk = true;
+      // Some browsers suspend the context on backgrounding; wake it back up.
+      audioCtx.onstatechange = function () {
+        if (audioCtx.state === "suspended" && isPoweredOn && !audio.paused) {
+          audioCtx.resume().catch(function () {});
+        }
+      };
+    } catch (e) {
+      // Fall back to direct playback; audio element still routes to speakers
+      webAudioOk = false;
+    }
+  }
+
+  function resumeAudioCtx() {
+    if (audioCtx && audioCtx.state === "suspended") {
+      audioCtx.resume().catch(function () {});
+    }
+  }
+
+  // Returning to the tab after backgrounding: make sure the context is alive
+  // and the timer display catches up.
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible" && isPoweredOn) {
+      resumeAudioCtx();
+    }
+  });
+
+  // ---------- Fetch helpers ----------
+  function fetchJsonWithTimeout(url, ms) {
+    const ctrl = new AbortController();
+    const t = setTimeout(function () { ctrl.abort(); }, ms);
+    return fetch(url, { signal: ctrl.signal })
+      .then(function (r) {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      })
+      .finally(function () { clearTimeout(t); });
+  }
+
+  function buildSearchUrl(station, page) {
+    let q = "collection:(oldtimeradio)";
+    if (station.tag) q += " AND " + station.tag;
+    return "https://archive.org/advancedsearch.php?q=" + encodeURIComponent(q) +
+      "&fl[]=identifier&output=json&rows=100&page=" + page;
+  }
+
+  function getIdentifiers(station) {
+    const cached = idCache[station.id];
+    if (cached && cached.length) return Promise.resolve(cached);
+    // Random page adds variety between sessions; fall back to page 1 if empty.
+    const page = 1 + Math.floor(Math.random() * 8);
+    return fetchJsonWithTimeout(buildSearchUrl(station, page), 10000)
+      .then(function (data) {
+        const docs = (data.response && data.response.docs) || [];
+        if (docs.length) return docs;
+        return fetchJsonWithTimeout(buildSearchUrl(station, 1), 10000)
+          .then(function (d2) { return (d2.response && d2.response.docs) || []; });
+      })
+      .then(function (docs) {
+        const ids = docs.map(function (d) { return d.identifier; }).filter(Boolean);
+        if (!ids.length) throw new Error("No identifiers");
+        idCache[station.id] = ids;
+        return ids;
+      });
+  }
+
+  function pickRandom(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  function cleanTitle(name) {
+    let t = name.replace(/\.mp3$/i, "");
+    t = t.replace(/[_]+/g, " ").replace(/\s{2,}/g, " ").trim();
+    return t || name;
+  }
+
+  function encodePath(name) {
+    return name.split("/").map(encodeURIComponent).join("/");
+  }
+
+  // ---------- Core: tune in / next track ----------
+  function tuneIn() {
+    if (!isPoweredOn || !activeStation) return;
+    const mySession = ++session;
+    isLoading = true;
+    setTuningUI();
+
+    attempt(0);
+
+    function attempt(tries) {
+      if (mySession !== session) return; // stale
+      if (tries >= 6) {
+        isLoading = false;
+        displayEl.classList.remove("tuning");
+        titleEl.textContent = "Signal lost. Check your connection and flip the power switch.";
+        subEl.textContent = "";
+        return;
+      }
+
+      getIdentifiers(activeStation)
+        .then(function (ids) {
+          if (mySession !== session) throw { stale: true };
+          const identifier = pickRandom(ids);
+          return fetchJsonWithTimeout("https://archive.org/metadata/" + identifier, 10000)
+            .then(function (meta) { return { identifier: identifier, meta: meta }; });
+        })
+        .then(function (res) {
+          if (mySession !== session) throw { stale: true };
+          const files = (res.meta && res.meta.files) || [];
+          const mp3s = files.filter(function (f) {
+            const isMp3Name = typeof f.name === "string" && /\.mp3$/i.test(f.name);
+            const isMp3Format = typeof f.format === "string" && f.format.indexOf("MP3") !== -1;
+            return isMp3Name || (isMp3Format && f.name);
+          });
+          if (!mp3s.length) throw new Error("No MP3s in item");
+
+          const file = pickRandom(mp3s);
+          const itemTitle = (res.meta.metadata && res.meta.metadata.title) || res.identifier;
+          const url = "https://archive.org/download/" + res.identifier + "/" + encodePath(file.name);
+
+          currentTrackInfo = {
+            title: cleanTitle(file.name),
+            itemTitle: typeof itemTitle === "string" ? itemTitle : res.identifier,
+            identifier: res.identifier
+          };
+
+          playUrl(url, mySession);
+        })
+        .catch(function (err) {
+          if (err && err.stale) return;
+          // Silently discard and retry with a different identifier
+          setTimeout(function () { attempt(tries + 1); }, 300);
+        });
+    }
+  }
+
+  function playUrl(url, mySession) {
+    audio.src = url;
+    audio.load();
+
+    const onCanPlay = function () {
+      cleanup();
+      if (mySession !== session) return;
+      audio.play().then(function () {
+        if (mySession !== session) return;
+        isLoading = false;
+        setPlayingUI();
+        updateMediaSession();
+      }).catch(function () {
+        // Autoplay blocked or decode issue — try another track
+        retry();
+      });
+    };
+
+    const onError = function () {
+      cleanup();
+      retry();
+    };
+
+    function retry() {
+      if (mySession !== session) return;
+      setTimeout(tuneIn, 300);
+    }
+
+    function cleanup() {
+      audio.removeEventListener("canplay", onCanPlay);
+      audio.removeEventListener("error", onError);
+    }
+
+    audio.addEventListener("canplay", onCanPlay);
+    audio.addEventListener("error", onError);
+  }
+
+  // When a broadcast ends, immediately tune the next one on the same station
+  audio.addEventListener("ended", function () {
+    if (isPoweredOn && activeStation) tuneIn();
+  });
+
+  // Mid-playback failures (network drop, bad file) — recover instead of going silent
+  audio.addEventListener("stalled", noopGuard);
+  function noopGuard() { /* stalled often self-recovers; rely on 'error' + 'ended' */ }
+
+  // ---------- UI states ----------
+  function setStandbyUI() {
+    eyebrowEl.textContent = "STANDBY";
+    titleEl.textContent = "Select a station to tune in.";
+    subEl.textContent = "";
+    timerEl.textContent = "--:--";
+    displayEl.classList.remove("tuning");
+  }
+
+  function setTuningUI() {
+    eyebrowEl.textContent = activeStation ? activeStation.name.toUpperCase() : "";
+    titleEl.textContent = "Tuning in...";
+    subEl.textContent = "";
+    timerEl.textContent = "--:--";
+    displayEl.classList.add("tuning");
+  }
+
+  function setPlayingUI() {
+    displayEl.classList.remove("tuning");
+    eyebrowEl.textContent = "NOW PLAYING \u00B7 " + activeStation.name.toUpperCase();
+    titleEl.textContent = currentTrackInfo.title;
+    subEl.textContent = currentTrackInfo.itemTitle !== currentTrackInfo.title ? currentTrackInfo.itemTitle : "";
+  }
+
+  function setPowerUI() {
+    appEl.classList.toggle("on", isPoweredOn);
+    appEl.classList.toggle("off", !isPoweredOn);
+    powerBtn.setAttribute("aria-pressed", String(isPoweredOn));
+    powerLabel.textContent = isPoweredOn ? "POWER ON" : "POWER OFF";
+  }
+
+  // ---------- Timer ----------
+  function formatTime(s) {
+    if (!isFinite(s) || s < 0) return "--:--";
+    s = Math.floor(s);
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    const mm = String(m).padStart(2, "0");
+    const ss = String(sec).padStart(2, "0");
+    return h > 0 ? h + ":" + mm + ":" + ss : mm + ":" + ss;
+  }
+
+  audio.addEventListener("timeupdate", function () {
+    if (!isPoweredOn || isLoading) return;
+    const remaining = (audio.duration || 0) - (audio.currentTime || 0);
+    timerEl.textContent = formatTime(remaining);
+  });
+
+  // ---------- Media Session ----------
+  function updateMediaSession() {
+    if (!("mediaSession" in navigator)) return;
+    try {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: currentTrackInfo ? currentTrackInfo.title : "Old Time Radio",
+        artist: activeStation ? "WOTR \u00B7 " + activeStation.name : "WOTR",
+        album: currentTrackInfo ? currentTrackInfo.itemTitle : ""
+      });
+      navigator.mediaSession.playbackState = "playing";
+      navigator.mediaSession.setActionHandler("play", function () {
+        resumeAudioCtx();
+        audio.play().catch(function () {});
+      });
+      navigator.mediaSession.setActionHandler("pause", function () {
+        audio.pause();
+      });
+      navigator.mediaSession.setActionHandler("stop", function () {
+        powerOff();
+      });
+      // Deliberately no nexttrack/previoustrack — it's a radio, not a playlist.
+      navigator.mediaSession.setActionHandler("nexttrack", null);
+      navigator.mediaSession.setActionHandler("previoustrack", null);
+    } catch (e) { /* unsupported handler names on some browsers */ }
+  }
+
+  // ---------- Power & station logic ----------
+  function powerOn() {
+    isPoweredOn = true;
+    initWebAudio();
+    resumeAudioCtx();
+    setPowerUI();
+    if (activeStation) {
+      tuneIn(); // fresh fetch — never resumes the previous track
+    } else {
+      setStandbyUI();
+      titleEl.textContent = "Select a station to tune in.";
+    }
+  }
+
+  function powerOff() {
+    isPoweredOn = false;
+    session++; // invalidate in-flight fetches
+    isLoading = false;
+    audio.pause();
+    audio.removeAttribute("src"); // stop background buffering
+    audio.load();
+    currentTrackInfo = null;
+    if ("mediaSession" in navigator) {
+      try { navigator.mediaSession.playbackState = "none"; } catch (e) {}
+    }
+    setPowerUI();
+    setStandbyUI();
+    if (activeStation) {
+      eyebrowEl.textContent = activeStation.name.toUpperCase() + " \u00B7 OFF AIR";
+      titleEl.textContent = "Radio is off.";
+    }
+  }
+
+  powerBtn.addEventListener("click", function () {
+    if (isPoweredOn) powerOff(); else powerOn();
+  });
+
+  function selectStation(st) {
+    const changed = !activeStation || activeStation.id !== st.id;
+    activeStation = st;
+    markActiveStation();
+    if (!isPoweredOn) {
+      powerOn(); // selecting a station is the user's interaction — turn the set on
+    } else if (changed) {
+      tuneIn();
+    }
+    // Clicking the already-active station while on does nothing — no skip button in disguise.
+  }
+})();
+</script>
+</body>
+</html>
