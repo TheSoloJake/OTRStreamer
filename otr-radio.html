@@ -22,15 +22,15 @@
     --mono: "Courier New", ui-monospace, SFMono-Regular, Menlo, monospace;
     --sans: "Helvetica Neue", Arial, sans-serif;
   }
-
+ 
   * { margin: 0; padding: 0; box-sizing: border-box; }
-
+ 
   html, body {
     height: 100%;
     overscroll-behavior: none;            /* no pull-to-refresh killing the broadcast */
     -webkit-text-size-adjust: 100%;       /* stop iOS landscape font inflation */
   }
-
+ 
   body {
     background: var(--bg);
     color: var(--text);
@@ -40,15 +40,15 @@
     user-select: none;
     -webkit-user-select: none;
   }
-
+ 
   button { touch-action: manipulation; }  /* kill double-tap zoom delay on controls */
-
+ 
   .app {
     display: flex;
     height: 100vh;
     height: 100dvh;
   }
-
+ 
   /* ---------- SIDEBAR ---------- */
   .sidebar {
     width: 240px;
@@ -59,12 +59,12 @@
     flex-direction: column;
     padding: 28px 0;
   }
-
+ 
   .brand {
     padding: 0 24px 24px;
     border-bottom: 1px solid var(--border);
   }
-
+ 
   .brand h1 {
     font-family: var(--mono);
     font-size: 22px;
@@ -72,7 +72,7 @@
     color: var(--text);
     font-weight: 700;
   }
-
+ 
   .brand .freq {
     font-family: var(--mono);
     font-size: 11px;
@@ -80,7 +80,7 @@
     color: var(--text-dim);
     margin-top: 4px;
   }
-
+ 
   .station-label {
     font-family: var(--mono);
     font-size: 10px;
@@ -88,13 +88,16 @@
     color: var(--text-dim);
     padding: 24px 24px 10px;
   }
-
+ 
+  /* Mobile-only dropdown trigger — hidden on desktop, where the list is always shown */
+  .station-trigger { display: none; }
+ 
   .stations {
     list-style: none;
     flex: 1;
     overflow-y: auto;
   }
-
+ 
   .stations button {
     display: flex;
     align-items: center;
@@ -111,17 +114,17 @@
     cursor: pointer;
     transition: color 0.2s, background 0.2s, border-color 0.2s;
   }
-
+ 
   .stations button:hover {
     color: var(--text);
     background: var(--bg-raised);
   }
-
+ 
   .stations button:focus-visible {
     outline: 2px solid var(--phosphor);
     outline-offset: -2px;
   }
-
+ 
   .stations button .dot {
     width: 7px;
     height: 7px;
@@ -130,19 +133,19 @@
     flex-shrink: 0;
     transition: background 0.2s, box-shadow 0.2s;
   }
-
+ 
   .stations li.active button {
     color: var(--text);
     font-weight: 700;
     background: var(--bg-raised);
     border-left-color: var(--phosphor);
   }
-
+ 
   .stations li.active button .dot {
     background: var(--phosphor);
     box-shadow: 0 0 8px var(--phosphor-glow);
   }
-
+ 
   /* ---------- MAIN ---------- */
   .main {
     flex: 1;
@@ -156,7 +159,7 @@
       radial-gradient(ellipse 80% 60% at 50% 40%, rgba(0,255,65,0.025), transparent 70%),
       var(--bg);
   }
-
+ 
   /* faint scanlines over the display, like a lit dial glass */
   .display {
     width: 100%;
@@ -171,7 +174,7 @@
       var(--bg-panel);
     transition: opacity 0.6s;
   }
-
+ 
   .display .eyebrow {
     font-family: var(--mono);
     font-size: 11px;
@@ -180,7 +183,7 @@
     margin-bottom: 18px;
     min-height: 14px;
   }
-
+ 
   .display .title {
     font-family: var(--mono);
     font-size: clamp(18px, 3vw, 26px);
@@ -191,7 +194,7 @@
     min-height: 38px;
     transition: color 0.5s, text-shadow 0.5s;
   }
-
+ 
   .display .subtitle {
     font-family: var(--sans);
     font-size: 13px;
@@ -199,7 +202,7 @@
     margin-top: 12px;
     min-height: 16px;
   }
-
+ 
   .display .timer {
     font-family: var(--mono);
     font-size: clamp(28px, 5vw, 42px);
@@ -210,7 +213,7 @@
     font-variant-numeric: tabular-nums;
     transition: color 0.5s, text-shadow 0.5s;
   }
-
+ 
   .display .timer-label {
     font-family: var(--mono);
     font-size: 10px;
@@ -218,14 +221,14 @@
     color: var(--text-dim);
     margin-top: 6px;
   }
-
+ 
   /* powered-off dimming */
   .app.off .display .title,
   .app.off .display .timer {
     color: var(--phosphor-dim);
     text-shadow: none;
   }
-
+ 
   /* tuning flicker */
   @keyframes flicker {
     0%, 100% { opacity: 1; }
@@ -237,7 +240,7 @@
   @media (prefers-reduced-motion: reduce) {
     .display.tuning .title { animation: none; opacity: 0.7; }
   }
-
+ 
   /* ---------- POWER ---------- */
   .power-row {
     margin-top: 40px;
@@ -245,7 +248,7 @@
     align-items: center;
     gap: 14px;
   }
-
+ 
   .power-btn {
     width: 64px;
     height: 64px;
@@ -259,12 +262,12 @@
     justify-content: center;
     transition: border-color 0.3s, color 0.3s, box-shadow 0.3s;
   }
-
+ 
   .power-btn:focus-visible {
     outline: 2px solid var(--phosphor);
     outline-offset: 3px;
   }
-
+ 
   .power-btn svg {
     width: 26px;
     height: 26px;
@@ -273,20 +276,144 @@
     stroke-width: 2.2;
     stroke-linecap: round;
   }
-
+ 
   .app.on .power-btn {
     border-color: var(--phosphor);
     color: var(--phosphor);
     box-shadow: 0 0 18px var(--phosphor-glow), inset 0 0 10px rgba(0,255,65,0.12);
   }
-
+ 
   .power-label {
     font-family: var(--mono);
     font-size: 11px;
     letter-spacing: 3px;
     color: var(--text-dim);
   }
-
+ 
+  /* ---------- SLEEP TIMER ---------- */
+  .sleep {
+    margin-top: 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+ 
+  .sleep-head {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+  }
+ 
+  .sleep-opts {
+    display: flex;
+    gap: 10px;
+  }
+ 
+  .sleep-btn {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 9px 14px;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    touch-action: manipulation;
+  }
+ 
+  .sleep-btn:hover {
+    color: var(--text);
+    border-color: var(--text-dim);
+  }
+ 
+  .sleep-btn:focus-visible {
+    outline: 2px solid var(--phosphor);
+    outline-offset: 2px;
+  }
+ 
+  .sleep-btn.active {
+    color: var(--phosphor);
+    border-color: var(--phosphor);
+    background: rgba(0, 255, 65, 0.08);
+    box-shadow: 0 0 10px var(--phosphor-glow);
+  }
+ 
+  .sleep-countdown {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--phosphor);
+    text-shadow: 0 0 8px var(--phosphor-glow);
+    font-variant-numeric: tabular-nums;
+  }
+ 
+  /* ---------- RECENTLY PLAYED ---------- */
+  .recent {
+    margin-top: 36px;
+    width: 100%;
+    max-width: 640px;
+  }
+ 
+  .recent-head {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    text-align: center;
+    margin-bottom: 14px;
+  }
+ 
+  .recent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+ 
+  .recent-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 16px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+  }
+ 
+  .recent-title {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+ 
+  .recent-link {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 1px;
+    color: var(--phosphor);
+    text-decoration: none;
+    white-space: nowrap;
+    flex-shrink: 0;
+    padding: 4px 8px;
+    border: 1px solid var(--phosphor-dim);
+    border-radius: 4px;
+    transition: background 0.2s, box-shadow 0.2s;
+  }
+ 
+  .recent-link:hover,
+  .recent-link:focus-visible {
+    background: rgba(0, 255, 65, 0.08);
+    box-shadow: 0 0 10px var(--phosphor-glow);
+    outline: none;
+  }
+ 
   /* ---------- MOBILE ---------- */
   @media (max-width: 720px) {
     .app { flex-direction: column; }
@@ -296,9 +423,11 @@
       border-right: none;
       border-bottom: 1px solid var(--border);
       padding: calc(12px + env(safe-area-inset-top)) 0 0;
+      position: relative;            /* anchor for the absolute dropdown */
+      z-index: 60;
     }
     .brand {
-      padding: 0 calc(16px + env(safe-area-inset-left)) 10px;
+      padding: 0 calc(16px + env(safe-area-inset-left)) 12px;
       display: flex;
       align-items: baseline;
       gap: 10px;
@@ -307,29 +436,84 @@
     .brand h1 { font-size: 18px; }
     .brand .freq { margin-top: 0; font-size: 10px; }
     .station-label { display: none; }
-    .stations {
+ 
+    /* The tappable trigger bar */
+    .station-trigger {
       display: flex;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      scroll-snap-type: x proximity;
-      scrollbar-width: none;              /* Firefox */
-      padding: 0 calc(8px + env(safe-area-inset-left));
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      background: var(--bg-raised);
+      border: none;
       border-top: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 15px;
+      letter-spacing: 1px;
+      text-align: left;
+      padding: 15px calc(16px + env(safe-area-inset-right))
+               15px calc(20px + env(safe-area-inset-left));
+      cursor: pointer;
+      touch-action: manipulation;
+      min-height: 52px;
     }
-    .stations::-webkit-scrollbar { display: none; }
+    .station-trigger:focus-visible {
+      outline: 2px solid var(--phosphor);
+      outline-offset: -2px;
+    }
+    .station-trigger-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--phosphor);
+      box-shadow: 0 0 8px var(--phosphor-glow);
+      flex-shrink: 0;
+    }
+    .station-trigger-label { flex: 1; }
+    .station-trigger-chevron {
+      width: 20px;
+      height: 20px;
+      stroke: var(--text-dim);
+      fill: none;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex-shrink: 0;
+      transition: transform 0.25s ease;
+    }
+    .sidebar.open .station-trigger-chevron { transform: rotate(180deg); }
+ 
+    /* The dropdown panel — hidden until the sidebar is .open */
+    .stations {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      flex-direction: column;
+      background: var(--bg-panel);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 16px 28px rgba(0, 0, 0, 0.55);
+      max-height: 70vh;
+      overflow-y: auto;
+      z-index: 60;
+    }
+    .sidebar.open .stations { display: flex; }
     .stations button {
-      white-space: nowrap;
+      width: 100%;
       border-left: none;
-      border-bottom: 3px solid transparent;
-      padding: 0 16px;
-      min-height: 48px;                   /* comfortable thumb target */
-      scroll-snap-align: start;
-      font-size: 14px;
+      border-bottom: 1px solid var(--border);
+      padding: 0 calc(20px + env(safe-area-inset-left));
+      min-height: 54px;              /* comfortable thumb target */
+      font-size: 15px;
     }
+    .stations li:last-child button { border-bottom: none; }
     .stations li.active button {
       border-left: none;
-      border-bottom-color: var(--phosphor);
-      background: none;
+      background: var(--bg-raised);
+      color: var(--text);
+      font-weight: 700;
     }
     .main {
       padding: 20px calc(16px + env(safe-area-inset-right))
@@ -341,8 +525,11 @@
     .display .timer { margin-top: 22px; }
     .power-row { margin-top: 0; flex-direction: column; gap: 10px; }
     .power-btn { width: 76px; height: 76px; }  /* primary control = biggest target */
+    .sleep { margin-top: 20px; }
+    .recent { margin-top: 24px; }
+    .recent-title { font-size: 12px; max-width: 55vw; }
   }
-
+ 
   /* Phone in landscape: keep everything on one screen, no scrolling */
   @media (max-width: 920px) and (max-height: 450px) {
     .sidebar { padding-top: 8px; }
@@ -361,15 +548,23 @@
 </head>
 <body>
 <div class="app off" id="app">
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div class="brand">
       <h1>WOTR</h1>
       <div class="freq">OLD TIME RADIO &middot; AM 1937</div>
     </div>
+    <button class="station-trigger" type="button" id="stationTrigger"
+            aria-haspopup="true" aria-expanded="false" aria-controls="stationList">
+      <span class="station-trigger-dot" id="stationTriggerDot" style="opacity:0.25"></span>
+      <span class="station-trigger-label" id="stationTriggerLabel">SELECT STATION</span>
+      <svg class="station-trigger-chevron" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6 9l6 6 6-6"/>
+      </svg>
+    </button>
     <div class="station-label">STATIONS</div>
     <ul class="stations" id="stationList"></ul>
   </aside>
-
+ 
   <main class="main">
     <div class="display" id="display">
       <div class="eyebrow" id="eyebrow">STANDBY</div>
@@ -378,7 +573,7 @@
       <div class="timer" id="timer">--:--</div>
       <div class="timer-label">TIME REMAINING</div>
     </div>
-
+ 
     <div class="power-row">
       <button class="power-btn" id="powerBtn" aria-label="Power" aria-pressed="false">
         <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -388,35 +583,69 @@
       </button>
       <div class="power-label" id="powerLabel">POWER OFF</div>
     </div>
+ 
+    <div class="sleep" id="sleep">
+      <div class="sleep-head">SLEEP TIMER</div>
+      <div class="sleep-opts" id="sleepOpts">
+        <button class="sleep-btn" type="button" data-min="30">30 min</button>
+        <button class="sleep-btn" type="button" data-min="60">60 min</button>
+        <button class="sleep-btn" type="button" data-min="90">90 min</button>
+      </div>
+      <div class="sleep-countdown" id="sleepCountdown" hidden></div>
+    </div>
+ 
+    <section class="recent" id="recent" hidden aria-label="Recently played">
+      <div class="recent-head">RECENTLY PLAYED</div>
+      <div class="recent-list" id="recentList"></div>
+    </section>
   </main>
 </div>
-
+ 
 <audio id="player" preload="auto" crossorigin="anonymous" playsinline style="display:none"></audio>
-
+ 
 <script>
 (function () {
   "use strict";
-
+ 
   // ---------- Station definitions ----------
+  // Stations with `tag` hit the Advanced Search API. The Music station instead
+  // draws from a hand-picked `musicIdentifiers` list (curated:true) and skips
+  // the search step entirely — see getIdentifiers().
   const STATIONS = [
     { id: "comedy",    name: "Comedy",          tag: "subject:(comedy OR sitcom)" },
     { id: "mystery",   name: "Mystery / Horror", tag: "subject:(mystery OR horror OR suspense OR thriller)" },
     { id: "detective", name: "Detective / Crime", tag: "subject:(detective OR crime OR police OR noir)" },
     { id: "western",   name: "Westerns",         tag: "subject:(western OR frontier)" },
-    { id: "variety",   name: "Variety",          tag: null }
+    { id: "variety",   name: "Variety",          tag: null },
+    { id: "music",     name: "Music",            tag: null, curated: true }
   ];
-
+ 
+  // Curated Archive.org identifiers for the Music station.
+  const musicIdentifiers = [
+    'general-electric-show-52-54-1952-12-25-12-guest-gary-crosby',
+    'YourHitParade_OTR_3419',
+    'SongsBySinatra451017FirstSongWhatMakesTheSunSet'
+  ];
+ 
   // ---------- State ----------
   let activeStation = null;     // station object
   let isPoweredOn = false;
   let isLoading = false;
-  let currentTrackInfo = null;  // { title, itemTitle, identifier }
+  let currentTrackInfo = null;  // { title, itemTitle, identifier, url }
   let session = 0;              // incremented to invalidate in-flight fetches
   const idCache = {};           // stationId -> array of identifiers
-
+  const recentlyPlayed = [];    // last 2 finished shows, most-recent first
+  let sleepMinutes = 0;         // 0 = off; otherwise 30/60/90
+  let sleepDeadline = null;     // wall-clock ms timestamp the radio shuts off at
+  let sleepInterval = null;
+ 
   // ---------- DOM ----------
   const appEl = document.getElementById("app");
   const listEl = document.getElementById("stationList");
+  const sidebarEl = document.getElementById("sidebar");
+  const stationTrigger = document.getElementById("stationTrigger");
+  const stationTriggerLabel = document.getElementById("stationTriggerLabel");
+  const stationTriggerDot = document.getElementById("stationTriggerDot");
   const displayEl = document.getElementById("display");
   const eyebrowEl = document.getElementById("eyebrow");
   const titleEl = document.getElementById("trackTitle");
@@ -424,8 +653,12 @@
   const timerEl = document.getElementById("timer");
   const powerBtn = document.getElementById("powerBtn");
   const powerLabel = document.getElementById("powerLabel");
+  const recentEl = document.getElementById("recent");
+  const recentListEl = document.getElementById("recentList");
+  const sleepOptsEl = document.getElementById("sleepOpts");
+  const sleepCountdownEl = document.getElementById("sleepCountdown");
   const audio = document.getElementById("player");
-
+ 
   // ---------- Build station list ----------
   STATIONS.forEach(function (st) {
     const li = document.createElement("li");
@@ -439,22 +672,135 @@
     li.appendChild(btn);
     listEl.appendChild(li);
   });
-
+ 
   function markActiveStation() {
     Array.prototype.forEach.call(listEl.children, function (li) {
       const isActive = !!activeStation && li.dataset.id === activeStation.id;
       li.classList.toggle("active", isActive);
-      if (isActive && li.scrollIntoView) {
-        // On mobile the station bar scrolls horizontally — keep the live one visible
-        li.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
-      }
+    });
+    // Keep the mobile dropdown trigger in sync with the live station.
+    stationTriggerLabel.textContent = activeStation ? activeStation.name : "SELECT STATION";
+    stationTriggerDot.style.opacity = activeStation ? "1" : "0.25";
+  }
+ 
+  // ---------- Mobile station dropdown ----------
+  function setStationMenu(open) {
+    sidebarEl.classList.toggle("open", open);
+    stationTrigger.setAttribute("aria-expanded", String(open));
+  }
+ 
+  stationTrigger.addEventListener("click", function (e) {
+    e.stopPropagation();
+    setStationMenu(!sidebarEl.classList.contains("open"));
+  });
+ 
+  // Tap anywhere outside the menu closes it
+  document.addEventListener("click", function (e) {
+    if (sidebarEl.classList.contains("open") && !sidebarEl.contains(e.target)) {
+      setStationMenu(false);
+    }
+  });
+ 
+  // Escape closes it too
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") setStationMenu(false);
+  });
+ 
+  // ---------- Recently played log (last 2 shows) ----------
+  function pushHistory(track) {
+    if (!track || !track.url) return;
+    // Avoid logging the same show twice in a row (e.g. a station replaying it).
+    if (recentlyPlayed.length && recentlyPlayed[0].url === track.url) return;
+    recentlyPlayed.unshift(track);
+    while (recentlyPlayed.length > 2) recentlyPlayed.pop();
+    renderHistory();
+  }
+ 
+  function renderHistory() {
+    if (!recentlyPlayed.length) {
+      recentEl.hidden = true;
+      recentListEl.textContent = "";
+      return;
+    }
+    recentEl.hidden = false;
+    recentListEl.textContent = "";
+    recentlyPlayed.forEach(function (track) {
+      const row = document.createElement("div");
+      row.className = "recent-row";
+ 
+      const name = document.createElement("span");
+      name.className = "recent-title";
+      name.textContent = track.title;
+      name.title = track.title;
+ 
+      const link = document.createElement("a");
+      link.className = "recent-link";
+      link.href = track.url;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = "Listen Here \u2197";
+ 
+      row.appendChild(name);
+      row.appendChild(link);
+      recentListEl.appendChild(row);
     });
   }
-
+ 
+  // ---------- Sleep timer ----------
+  // Uses a wall-clock deadline rather than a decrementing counter, so mobile
+  // background-throttling can't make the timer drift — when setInterval next
+  // fires, the clock check is still accurate.
+  Array.prototype.forEach.call(sleepOptsEl.querySelectorAll(".sleep-btn"), function (btn) {
+    btn.addEventListener("click", function () {
+      setSleep(parseInt(btn.dataset.min, 10));
+    });
+  });
+ 
+  function setSleep(minutes) {
+    if (sleepMinutes === minutes) { clearSleep(); return; } // tapping active = cancel
+    sleepMinutes = minutes;
+    sleepDeadline = Date.now() + minutes * 60000;
+    if (sleepInterval) clearInterval(sleepInterval);
+    sleepInterval = setInterval(tickSleep, 1000);
+    renderSleep();
+  }
+ 
+  function clearSleep() {
+    sleepMinutes = 0;
+    sleepDeadline = null;
+    if (sleepInterval) { clearInterval(sleepInterval); sleepInterval = null; }
+    renderSleep();
+  }
+ 
+  function tickSleep() {
+    if (!sleepDeadline) return;
+    const remainingMs = sleepDeadline - Date.now();
+    if (remainingMs <= 0) {
+      // Fire: shut the set off. powerOff() calls clearSleep() so this won't loop.
+      if (isPoweredOn) powerOff();
+      else clearSleep();
+      return;
+    }
+    sleepCountdownEl.textContent = "SLEEPS IN " + formatTime(remainingMs / 1000);
+  }
+ 
+  function renderSleep() {
+    Array.prototype.forEach.call(sleepOptsEl.querySelectorAll(".sleep-btn"), function (btn) {
+      btn.classList.toggle("active", parseInt(btn.dataset.min, 10) === sleepMinutes);
+    });
+    if (sleepMinutes && sleepDeadline) {
+      sleepCountdownEl.hidden = false;
+      tickSleep();
+    } else {
+      sleepCountdownEl.hidden = true;
+      sleepCountdownEl.textContent = "";
+    }
+  }
+ 
   // ---------- Web Audio: compressor as auto gain control ----------
   let audioCtx = null;
   let webAudioOk = false;
-
+ 
   // iOS suspends/interrupts AudioContext when the screen locks or Safari is
   // backgrounded. Audio routed through Web Audio then goes SILENT even though
   // the <audio> element reports it is playing. A pocket radio that dies when
@@ -462,7 +808,7 @@
   // lock-screen playback beats volume normalization.
   const IS_IOS = /iP(hone|ad|od)/.test(navigator.userAgent) ||
     (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-
+ 
   function initWebAudio() {
     if (audioCtx || IS_IOS) return;
     try {
@@ -492,13 +838,13 @@
       webAudioOk = false;
     }
   }
-
+ 
   function resumeAudioCtx() {
     if (audioCtx && audioCtx.state === "suspended") {
       audioCtx.resume().catch(function () {});
     }
   }
-
+ 
   // Returning to the tab after backgrounding: make sure the context is alive
   // and the timer display catches up.
   document.addEventListener("visibilitychange", function () {
@@ -506,7 +852,7 @@
       resumeAudioCtx();
     }
   });
-
+ 
   // ---------- Fetch helpers ----------
   function fetchJsonWithTimeout(url, ms) {
     const ctrl = new AbortController();
@@ -518,15 +864,23 @@
       })
       .finally(function () { clearTimeout(t); });
   }
-
+ 
   function buildSearchUrl(station, page) {
     let q = "collection:(oldtimeradio)";
     if (station.tag) q += " AND " + station.tag;
     return "https://archive.org/advancedsearch.php?q=" + encodeURIComponent(q) +
       "&fl[]=identifier&output=json&rows=100&page=" + page;
   }
-
+ 
   function getIdentifiers(station) {
+    // Music station: skip the Advanced Search API entirely and serve the
+    // hand-picked list straight into Step 2.
+    if (station.curated) {
+      const ids = (musicIdentifiers || []).filter(Boolean);
+      if (!ids.length) return Promise.reject(new Error("No curated identifiers"));
+      return Promise.resolve(ids);
+    }
+ 
     const cached = idCache[station.id];
     if (cached && cached.length) return Promise.resolve(cached);
     // Random page adds variety between sessions; fall back to page 1 if empty.
@@ -545,30 +899,30 @@
         return ids;
       });
   }
-
+ 
   function pickRandom(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
   }
-
+ 
   function cleanTitle(name) {
     let t = name.replace(/\.mp3$/i, "");
     t = t.replace(/[_]+/g, " ").replace(/\s{2,}/g, " ").trim();
     return t || name;
   }
-
+ 
   function encodePath(name) {
     return name.split("/").map(encodeURIComponent).join("/");
   }
-
+ 
   // ---------- Core: tune in / next track ----------
   function tuneIn() {
     if (!isPoweredOn || !activeStation) return;
     const mySession = ++session;
     isLoading = true;
     setTuningUI();
-
+ 
     attempt(0);
-
+ 
     function attempt(tries) {
       if (mySession !== session) return; // stale
       if (tries >= 6) {
@@ -578,7 +932,7 @@
         subEl.textContent = "";
         return;
       }
-
+ 
       getIdentifiers(activeStation)
         .then(function (ids) {
           if (mySession !== session) throw { stale: true };
@@ -595,18 +949,19 @@
             return isMp3Name || (isMp3Format && f.name);
           });
           if (!mp3s.length) throw new Error("No MP3s in item");
-
+ 
           const file = pickRandom(mp3s);
           const itemTitle = (res.meta.metadata && res.meta.metadata.title) || res.identifier;
           const url = "https://archive.org/download/" + res.identifier + "/" + encodePath(file.name);
-
-          currentTrackInfo = {
+ 
+          const candidate = {
             title: cleanTitle(file.name),
             itemTitle: typeof itemTitle === "string" ? itemTitle : res.identifier,
-            identifier: res.identifier
+            identifier: res.identifier,
+            url: url
           };
-
-          playUrl(url, mySession);
+ 
+          playUrl(url, mySession, candidate);
         })
         .catch(function (err) {
           if (err && err.stale) return;
@@ -615,16 +970,20 @@
         });
     }
   }
-
-  function playUrl(url, mySession) {
+ 
+  function playUrl(url, mySession, candidate) {
     audio.src = url;
     audio.load();
-
+ 
     const onCanPlay = function () {
       cleanup();
       if (mySession !== session) return;
       audio.play().then(function () {
         if (mySession !== session) return;
+        // The outgoing show (if any) is now genuinely "recently played" —
+        // record it only now that its successor has actually started.
+        if (currentTrackInfo) pushHistory(currentTrackInfo);
+        currentTrackInfo = candidate;
         isLoading = false;
         setPlayingUI();
         updateMediaSession();
@@ -633,35 +992,35 @@
         retry();
       });
     };
-
+ 
     const onError = function () {
       cleanup();
       retry();
     };
-
+ 
     function retry() {
       if (mySession !== session) return;
       setTimeout(tuneIn, 300);
     }
-
+ 
     function cleanup() {
       audio.removeEventListener("canplay", onCanPlay);
       audio.removeEventListener("error", onError);
     }
-
+ 
     audio.addEventListener("canplay", onCanPlay);
     audio.addEventListener("error", onError);
   }
-
+ 
   // When a broadcast ends, immediately tune the next one on the same station
   audio.addEventListener("ended", function () {
     if (isPoweredOn && activeStation) tuneIn();
   });
-
+ 
   // Mid-playback failures (network drop, bad file) — recover instead of going silent
   audio.addEventListener("stalled", noopGuard);
   function noopGuard() { /* stalled often self-recovers; rely on 'error' + 'ended' */ }
-
+ 
   // ---------- UI states ----------
   function setStandbyUI() {
     eyebrowEl.textContent = "STANDBY";
@@ -670,7 +1029,7 @@
     timerEl.textContent = "--:--";
     displayEl.classList.remove("tuning");
   }
-
+ 
   function setTuningUI() {
     eyebrowEl.textContent = activeStation ? activeStation.name.toUpperCase() : "";
     titleEl.textContent = "Tuning in...";
@@ -678,21 +1037,21 @@
     timerEl.textContent = "--:--";
     displayEl.classList.add("tuning");
   }
-
+ 
   function setPlayingUI() {
     displayEl.classList.remove("tuning");
     eyebrowEl.textContent = "NOW PLAYING \u00B7 " + activeStation.name.toUpperCase();
     titleEl.textContent = currentTrackInfo.title;
     subEl.textContent = currentTrackInfo.itemTitle !== currentTrackInfo.title ? currentTrackInfo.itemTitle : "";
   }
-
+ 
   function setPowerUI() {
     appEl.classList.toggle("on", isPoweredOn);
     appEl.classList.toggle("off", !isPoweredOn);
     powerBtn.setAttribute("aria-pressed", String(isPoweredOn));
     powerLabel.textContent = isPoweredOn ? "POWER ON" : "POWER OFF";
   }
-
+ 
   // ---------- Timer ----------
   function formatTime(s) {
     if (!isFinite(s) || s < 0) return "--:--";
@@ -704,13 +1063,13 @@
     const ss = String(sec).padStart(2, "0");
     return h > 0 ? h + ":" + mm + ":" + ss : mm + ":" + ss;
   }
-
+ 
   audio.addEventListener("timeupdate", function () {
     if (!isPoweredOn || isLoading) return;
     const remaining = (audio.duration || 0) - (audio.currentTime || 0);
     timerEl.textContent = formatTime(remaining);
   });
-
+ 
   // ---------- Media Session ----------
   function updateMediaSession() {
     if (!("mediaSession" in navigator)) return;
@@ -736,21 +1095,22 @@
       navigator.mediaSession.setActionHandler("previoustrack", null);
     } catch (e) { /* unsupported handler names on some browsers */ }
   }
-
+ 
   // ---------- Power & station logic ----------
   function powerOn() {
     isPoweredOn = true;
     initWebAudio();
     resumeAudioCtx();
-    setPowerUI();
-    if (activeStation) {
-      tuneIn(); // fresh fetch — never resumes the previous track
-    } else {
-      setStandbyUI();
-      titleEl.textContent = "Select a station to tune in.";
+    // First power-on with nothing tuned: pick a station at random and play it,
+    // like switching on a set that lands wherever the dial happens to be.
+    if (!activeStation) {
+      activeStation = pickRandom(STATIONS);
+      markActiveStation();
     }
+    setPowerUI();
+    tuneIn(); // fresh fetch — never resumes the previous track
   }
-
+ 
   function powerOff() {
     isPoweredOn = false;
     session++; // invalidate in-flight fetches
@@ -758,26 +1118,30 @@
     audio.pause();
     audio.removeAttribute("src"); // stop background buffering
     audio.load();
+    // The show that was playing is now recently-played — keep its link grabbable.
+    if (currentTrackInfo) pushHistory(currentTrackInfo);
     currentTrackInfo = null;
     if ("mediaSession" in navigator) {
       try { navigator.mediaSession.playbackState = "none"; } catch (e) {}
     }
     setPowerUI();
     setStandbyUI();
+    clearSleep(); // a manual or timer-driven shutoff cancels any pending sleep
     if (activeStation) {
       eyebrowEl.textContent = activeStation.name.toUpperCase() + " \u00B7 OFF AIR";
       titleEl.textContent = "Radio is off.";
     }
   }
-
+ 
   powerBtn.addEventListener("click", function () {
     if (isPoweredOn) powerOff(); else powerOn();
   });
-
+ 
   function selectStation(st) {
     const changed = !activeStation || activeStation.id !== st.id;
     activeStation = st;
     markActiveStation();
+    setStationMenu(false); // collapse the mobile dropdown after a pick
     if (!isPoweredOn) {
       powerOn(); // selecting a station is the user's interaction — turn the set on
     } else if (changed) {
