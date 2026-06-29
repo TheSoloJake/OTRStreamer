@@ -5,8 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#121212">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="WOTR">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="favicon-64.png">
 <title>WOTR — Old Time Radio</title>
 <style>
   :root {
@@ -620,11 +624,86 @@
     { id: "music",     name: "Music",            tag: null, curated: true }
   ];
 
-  // Curated Archive.org identifiers for the Music station.
+  // Curated Archive.org identifiers for the Music station. Each is an archive.org
+  // ITEM (not a single file) — its MP3s are discovered via the metadata API.
   const musicIdentifiers = [
     'general-electric-show-52-54-1952-12-25-12-guest-gary-crosby',
     'YourHitParade_OTR_3419',
     'SongsBySinatra451017FirstSongWhatMakesTheSunSet'
+  ];
+
+  // Direct MP3 URLs for the Music station (non-archive.org). These are final,
+  // ready-to-play files — no metadata lookup, they play as-is. Each entry is
+  // { url, title }. Title is what shows in the display + Recently Played log.
+  // TODO: add your direct MP3 links here, e.g.
+  //   { url: "https://example.com/songs/in-the-mood.mp3", title: "In the Mood" },
+  const musicDirectUrls = [
+    { url: "https://otrr.org/OTRRLibrary/jukebox/Telephone%20Hour%20(AFRS%20-%20Music%20from%20America)%20440918%20098%20Guest%20-%20Oscar%20Levant_OTRRPG.mp3",
+      title: "Telephone Hour \u2014 Guest: Oscar Levant (1944-09-18)" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/Telephone%20Hour%20(AFRS%20-%20Music%20from%20America)%20440911%20097%20Guest%20-%20Marian%20Anderson_OTRRPG.mp3",
+      title: "Telephone Hour \u2014 Guest: Marian Anderson (1944-09-11)" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/Telephone%20Hour%20(AFRS%20-%20Music%20from%20America)%20440904%20096%20Guest%20-%20Ezio%20Pinza_OTRRPG.mp3",
+      title: "Telephone Hour \u2014 Guest: Ezio Pinza (1944-09-04)" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/The%20Bell%20Telephone%20Hour%2044-08-20%20(xx)%20Guest%20-%20Nelson%20Eddy.mp3",
+      title: "The Bell Telephone Hour \u2014 Guest: Nelson Eddy (1944-08-20)" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/The%20Bell%20Telephone%20Hour%2044-07-14%20(xx)%20Guest%20-%20Fritz%20Kreisler.mp3",
+      title: "The Bell Telephone Hour \u2014 Guest: Fritz Kreisler (1944-07-14)" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/The%20Bell%20Telephone%20Hour%2040-xx-xx%20(xx)%20Guest%20-%20Robert%20Scarvaros.mp3",
+      title: "The Bell Telephone Hour \u2014 Guest: Robert Scarvaros (1940)" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/Bell%20Telephone%20Hour%201948-04-05%20LQ.mp3",
+      title: "Bell Telephone Hour (1948-04-05)" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/Bell%20Telephone%20Hour%2048-03-22%20(x)%20Guest%20-%20Arturo%20Rubinstein.mp3",
+      title: "Bell Telephone Hour \u2014 Guest: Arturo Rubinstein (1948-03-22)" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/Bell%20Telephone%20Hour%2056-11-19%20(x)%20Guest%20-%20Renata%20Tibaldi.mp3",
+      title: "Bell Telephone Hour \u2014 Guest: Renata Tibaldi (1956-11-19)" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/Bell%20Telephone%20Hour%2056-07-02%20Leonard%20Warren.mp3",
+      title: "Bell Telephone Hour \u2014 Leonard Warren (1956-07-02)" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/Bell%20Telephone%20Hour%201947-02-03%20LQ.mp3",
+      title: "Bell Telephone Hour (1947-02-03)" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/Telephone%20Hour%20(AFRS%20-%20Music%20from%20America)%20451225%20112%20Guest%20-%20Helen%20Traubel_OTRRPG.mp3",
+      title: "Telephone Hour \u2014 Guest: Helen Traubel (1945-12-25)" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/Telephone%20Hour%20(AFRS%20-%20Music%20from%20America)%20450219%20121%20Guest%20-%20Fritz%20Kreisler_OTRRPG.mp3",
+      title: "Telephone Hour \u2014 Guest: Fritz Kreisler (1945-02-19)" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/Telephone%20Hour%20(AFRS%20-%20Music%20from%20America)%20460930%20206%20Guest%20-%20Bidu%20Sayao_OTRRPG.mp3",
+      title: "Telephone Hour \u2014 Guest: Bidu Sayao (1946-09-30)" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/Telephone%20Hour%20(AFRS%20-%20Music%20from%20America)%20450101%20113%20Guest%20-%20Fritz%20Kreisler_OTRRPG.mp3",
+      title: "Telephone Hour \u2014 Guest: Fritz Kreisler (1945-01-01)" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/Telephone%20Hour%20(AFRS%20-%20Music%20from%20America)%20440925%20099%20Guest%20-%20Lily%20Pons_OTRRPG.mp3",
+      title: "Telephone Hour \u2014 Guest: Lily Pons (1944-09-25)" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/Telephone%20Hour%20(AFRS%20-%20Music%20from%20America)%20441218%20111%20Guest%20-%20Robert%20Casadesus_OTRRPG.mp3",
+      title: "Telephone Hour \u2014 Guest: Robert Casadesus (1944-12-18)" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/American%20Album%20of%20Familiar%20Music%20460210%20065%201st%20Song%20-%20Don%27t%20Ask%20Me%20Why%20%7BAFRS%23065%7D_OTRRPG.mp3",
+      title: "American Album of Familiar Music \u2014 Don't Ask Me Why (1946-02-10)" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/_AAFM%2045-10-14%20(xxx)%20First%20Song%20-%20When%20I%27m%20Looking%20At%20You.mp3",
+      title: "American Album of Familiar Music \u2014 When I'm Looking At You (1945-10-14)" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/American%20Album%20of%20Familiar%20Music%20450819%20040%201st%20Song%20-%20A%20Pretty%20Girl%20Is%20Like%20A%20Melody%20%7BAFRS%7D%20(128-48)_OTRRPG.mp3",
+      title: "American Album of Familiar Music \u2014 A Pretty Girl Is Like a Melody (1945-08-19)" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/American%20Album%20of%20Familiar%20Music%20450617%20031%201st%20Song%20-%20I%20Dream%20Too%20Much%20Alone%20%7BAFRS%23031%7D_OTRRPG.mp3",
+      title: "American Album of Familiar Music \u2014 I Dream Too Much Alone (1945-06-17)" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/American%20Album%20of%20Familiar%20Music%20450603%20029%201st%20Song%20-%20Strange%20Music%20%7BAFRS%23029%7D_OTRRPG.mp3",
+      title: "American Album of Familiar Music \u2014 Strange Music (1945-06-03)" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/_AAFM%20xx-xx-xx%20(170)%20First%20Song%20-%20The%20Way%20You%20Look%20Tonight.mp3",
+      title: "American Album of Familiar Music \u2014 The Way You Look Tonight" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/_AAFM%20xx-xx-xx%20(169)%20First%20Song%20-%20If%20I%20Love%20Again.mp3",
+      title: "American Album of Familiar Music \u2014 If I Love Again" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/Music%20by%20Kostelanetz%20431003%20011%201st%20Song%20-%20%27Desert%20Song%27%20Guests%20-%20Bidu%20Sayao,%20Oscar%20Levant%20%7BAFRS%7D_OTRRPG.mp3",
+      title: "Music by Kostelanetz \u2014 Desert Song; Guests: Bidu Sayao, Oscar Levant (1943-10-03)" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/Andre%20Kostelanetz%20Show%20[AFRS]%20035%20431114%20Guest%20-%20Kenny%20Baker_OTRRPG.mp3",
+      title: "Andre Kostelanetz Show \u2014 Guest: Kenny Baker (1943-11-14)" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/Andre%20Kostelanetz%20Show%20[AFRS]%20440116%20060%20Guest%20-%20Rise%20Stevens.mp3",
+      title: "Andre Kostelanetz Show \u2014 Guest: Rise Stevens (1944-01-16)" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/Andre%20Kostelanetz%20Show%2044-12-03%20Guest%20-%20Frank%20Parker.mp3",
+      title: "Andre Kostelanetz Show \u2014 Guest: Frank Parker (1944-12-03)" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/Andre%20Kostelanetz%20Show%20[AFRS]%20025%20460221%20Guest%20-%20Perry%20Como_OTRRPG.mp3",
+      title: "Andre Kostelanetz Show \u2014 Guest: Perry Como (1946-02-21)" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/Andre%20Kostelanetz%20Show%20[AFRS]%20032%20460411%20Guest%20-%20Ethel%20Smith_OTRRPG.mp3",
+      title: "Andre Kostelanetz Show \u2014 Guest: Ethel Smith (1946-04-11)" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/American%20Melody%20Hour%20(Replacing%20Fred%20Waring%20%23592)%204xxxxx%20xxxx%201st%20Song%20-%20I%27m%20Glad%20I%20Waited%20for%20You%20(Bob%20Hannon)%20%7BAFRS%7D_OTRRPG.mp3",
+      title: "American Melody Hour \u2014 I'm Glad I Waited for You (Bob Hannon)" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/American%20Melody%20Hour%20(Replacing%20Fred%20Waring%20%23593)%204xxxxx%20xxxx%201st%20Song%20-%20Symphony%20(Bob%20Hannon)%20%7BAFRS%7D_OTRRPG.mp3",
+      title: "American Melody Hour \u2014 Symphony (Bob Hannon)" },
+    { url: "https://otrr.org/OTRRLibrary/jukebox/American%20Melody%2047-12-17%20First%20Song%20-%20So%20Far.mp3",
+      title: "American Melody Hour \u2014 So Far (1947-12-17)" },
   ];
 
   // ---------- State ----------
@@ -931,6 +1010,28 @@
         titleEl.textContent = "Signal lost. Check your connection and flip the power switch.";
         subEl.textContent = "";
         return;
+      }
+
+      // Music station with direct (non-archive) MP3s: blend them with the
+      // archive.org items. Weight the coin by pool size so every individual
+      // source — direct file or archive item — is equally likely per track,
+      // rather than splitting 50/50 between the two kinds.
+      if (activeStation.curated && musicDirectUrls.length) {
+        const directN = musicDirectUrls.length;
+        const archiveN = (musicIdentifiers || []).length;
+        const pickDirect = Math.random() < directN / (directN + archiveN);
+        if (pickDirect) {
+          const choice = pickRandom(musicDirectUrls);
+          const candidate = {
+            title: choice.title || cleanTitle(choice.url.split("/").pop() || "Untitled"),
+            itemTitle: "",
+            identifier: null,
+            url: choice.url
+          };
+          playUrl(choice.url, mySession, candidate);
+          return;
+        }
+        // else fall through to the archive.org path below
       }
 
       getIdentifiers(activeStation)
